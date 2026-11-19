@@ -32,7 +32,17 @@ export type HelLoadingOptions = {
 /** Full-screen startup overlay. No-op outside the browser; cleanup is idempotent. */
 export const HEL_LOADING_TYPES: readonly HelLoadingType[]
 export function showHelLoading(options?: boolean | HelLoadingOptions): () => void
-export type HelPreloadOptions = HelAddressOptions & {
+export type HelCompsAutoInstall = boolean | readonly string[]
+export type HelAutoInstallOptions = {
+  /**
+   * comps 包在入口留了 install 钩子（install(Vue) / install()）时自动触发。
+   * false（默认）不注册；true 注册所有 comps-*；数组只注册列出的包（全名或短名）。
+   */
+  needCompsAutoInstall?: HelCompsAutoInstall
+  /** 传给 install 的 Vue 运行时；不传则以无参方式调用 install。 */
+  vue?: unknown
+}
+export type HelPreloadOptions = HelAddressOptions & HelAutoInstallOptions & {
   deps: readonly HelDep[]
   /** Disabled by default. true or an options object enables the startup overlay. */
   loading?: boolean | HelLoadingOptions
@@ -61,13 +71,16 @@ export function isHelMetaHost(host: string): boolean
 export function resolveHelDep(dep: HelDep, options?: HelAddressOptions): HelLoadSpec
 /** Stable libs-* -> comps-* -> other ordering; validates conflicting identities. */
 export function resolveHelDeps(options: HelPreloadOptions): HelLoadSpec[]
+export function installCompsLib(lib: object, vue?: unknown): boolean
 export function assertHelExports<T extends object>(
   moduleName: string, host: string, lib: T | null | undefined, requiredExports?: readonly string[],
 ): asserts lib is T
 
 export interface HelLoader {
   /** On-demand load. Shares requests and the serial queue with preload. */
-  loadHelLib<T extends object = HelLibRecord>(dep: string | HelLoadSpec<T>, options?: HelAddressOptions): Promise<T>
+  loadHelLib<T extends object = HelLibRecord>(
+    dep: string | HelLoadSpec<T>, options?: HelAddressOptions & HelAutoInstallOptions,
+  ): Promise<T>
   /** Explicit caller order, retained for callers with a dependency chain. */
   loadHelLibsSerial(specs: readonly HelLoadSpec[]): Promise<HelLibRecord[]>
   /** Resolves after all batches and optional loadApp. Always cleans up startup loading. */
