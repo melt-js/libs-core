@@ -68,6 +68,8 @@ export class HelLoadError extends Error {
 }
 
 export function isHelMetaHost(host: string): boolean
+/** True for native module scripts recorded from HEL metadata. */
+export function isHelModuleAsset(url: string): boolean
 export function resolveHelDep(dep: HelDep, options?: HelAddressOptions): HelLoadSpec
 /** Stable libs-* -> comps-* -> other ordering; validates conflicting identities. */
 export function resolveHelDeps(options: HelPreloadOptions): HelLoadSpec[]
@@ -96,6 +98,10 @@ export type HelFetchLib = (name: string, options: {
 /** Use one instance per runtime; separate instances have independent queues/caches. */
 export function createHelLoader(fetchLib?: HelFetchLib): HelLoader
 export const loadHelLib: HelLoader['loadHelLib']
+/** Pass the sub-app's document so qiankun can scope CSS even when HEL reuses code. */
+export function loadHelLibWithScopedStyles<T extends object = HelLibRecord>(
+  dep: string | HelLoadSpec<T>, scopedDocument: Document,
+): Promise<T>
 export const loadHelLibsSerial: HelLoader['loadHelLibsSerial']
 export const preloadHelLibs: HelLoader['preloadHelLibs']
 
