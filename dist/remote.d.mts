@@ -131,3 +131,8 @@ export function resolveHelHost(options: {
   baseUrl?: string
   projectName?: string
 }): string
+
+export function resolveComponentHosts(
+  packageName: string,
+  options?: { source?: string; bases?: Record<string, string>; origin?: string; version?: string; projectName?: string },
+): Array<{ source: string; host: string }>
